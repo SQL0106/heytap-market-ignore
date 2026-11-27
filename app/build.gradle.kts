@@ -4,8 +4,7 @@ plugins {
 
 android {
     namespace = "io.github.sql916.marketignore"
-    // libxposed API 102 ships minCompileSdk 37.
-    compileSdk = 37
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "io.github.sql916.marketignore"
