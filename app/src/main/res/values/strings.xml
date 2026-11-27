@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="module_description">在 realme/OPPO 软件商店点一次「忽略更新」即永久生效（libxposed API 102，仅作用于 com.heytap.market）。</string>
+</resources>

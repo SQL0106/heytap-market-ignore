@@ -1,0 +1,48 @@
+name: build
+
+on:
+  push:
+    branches: ['**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Ensure Android platform 37
+        run: |
+          set -e
+          SDK="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          echo "ANDROID_HOME=$SDK" >> "$GITHUB_ENV"
+          BIN=""
+          for cand in "$SDK/cmdline-tools/latest/bin" "$SDK"/cmdline-tools/*/bin; do
+            if [ -x "$cand/sdkmanager" ]; then BIN="$cand"; break; fi
+          done
+          if [ ! -d "$SDK/platforms/android-37" ] && [ -n "$BIN" ]; then
+            yes | "$BIN/sdkmanager" --licenses > /dev/null 2>&1 || true
+            "$BIN/sdkmanager" "platforms;android-37"
+          fi
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Build
+        run: bash gradlew --no-daemon assembleDebug
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: heytap-market-ignore
+          path: app/build/outputs/apk/debug/*.apk
