@@ -18,15 +18,26 @@ android {
         buildConfig = true
     }
 
+    signingConfigs {
+        create("stable") {
+            storeFile = rootProject.file("keystore/marketignore.p12")
+            storePassword = "marketignore"
+            keyAlias = "marketignore"
+            keyPassword = "marketignore"
+            storeType = "PKCS12"
+        }
+    }
+
     buildTypes {
         debug {
             buildConfigField("boolean", "VERBOSE_LOG", "true")
+            signingConfig = signingConfigs.getByName("stable")
         }
         release {
             isMinifyEnabled = false
             buildConfigField("boolean", "VERBOSE_LOG", "false")
-            // Side-load only: sign with the debug key so the artifact installs without a keystore.
-            signingConfig = signingConfigs.getByName("debug")
+            // Side-load only: signed with the committed throwaway key so updates install in place.
+            signingConfig = signingConfigs.getByName("stable")
         }
     }
 
