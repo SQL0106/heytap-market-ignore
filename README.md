@@ -16,8 +16,9 @@ Hook 点：
 
 | 类 | 方法 | 作用 |
 |---|---|---|
-| `a.a.kch`（混淆实现，26.11.3_CN） | `ބ(String)Z` / `ޏ(String,J)V` / `ސ(String)V` | 核心判定、写入、删除 |
-| `com.heytap.cdo.client.download.util.b`（稳定门面） | `isIgnored` / `setIgnore` / `setNoIgnore` / `getUpgradeInfoBeansNoIgnore` | 双保险 + 列表过滤 |
+| `com.heytap.cdo.client.download.util.b`（稳定门面） | `isIgnored` / `setIgnore` / `setNoIgnore` / `getUpgradeInfoBeansNoIgnore` | 判定覆盖、写入、移除、列表过滤 |
+
+混淆实现 `a.a.kch` 在 APK 里有类定义，但运行时默认 ClassLoader 解析不到（商店用 Hera 插件框架从 `app_hera_plugins` 动态加载业务 dex，插件里的混淆名与 base.apk 不一致），所以只 hook 未混淆门面。
 
 包名集合保存在商店进程自己的 `SharedPreferences`（`market_permanent_ignore`）中。
 
@@ -40,5 +41,5 @@ GitHub Actions（`.github/workflows/android.yml`）原生 `assembleDebug`，产�
 
 ## 注意
 
-- 只针对 `com.heytap.market` 26.11.3_CN 验证；商店大版本更新后混淆类名可能变化，届时更新 `IMPL_CLASS`。
+- 只针对 `com.heytap.market` 26.11.3_CN 验证；门面类 `com.heytap.cdo.client.download.util.b` 名称稳定，但仍可能随大版本调整。
 - 模块不申请任何权限，不联网。
