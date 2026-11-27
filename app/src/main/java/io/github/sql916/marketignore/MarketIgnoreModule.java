@@ -43,9 +43,25 @@ public class MarketIgnoreModule extends XposedModule {
         if (!TARGET.equals(param.getPackageName())) return;
         Log.i(TAG, "onPackageLoaded: " + param.getPackageName());
         classLoader = param.getDefaultClassLoader();
+        hookImpl();
+        hookFacade();
+    }
+
+    @Override
+    public void onPackageReady(XposedModuleInterface.PackageReadyParam param) {
+        if (!TARGET.equals(param.getPackageName())) return;
+        Log.i(TAG, "onPackageReady: " + param.getPackageName());
+        // The obfuscated implementation is not always resolvable at package-load time; retry here.
+        hookImpl();
+    }
+
+    private void hookImpl() {
         hook(IMPL_CLASS, M_IS_IGNORED, String.class);
         hook(IMPL_CLASS, M_SET_IGNORE, String.class, long.class);
         hook(IMPL_CLASS, M_SET_NO_IGNORE, String.class);
+    }
+
+    private void hookFacade() {
         hook(FACADE_CLASS, "isIgnored", String.class);
         hook(FACADE_CLASS, "setIgnore", String.class, long.class);
         hook(FACADE_CLASS, "setNoIgnore", String.class);
