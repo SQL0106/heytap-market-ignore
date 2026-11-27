@@ -23,7 +23,13 @@ Hook 点：
 
 ## 构建
 
-GitHub Actions（`.github/workflows/android.yml`）使用 ubuntu-24.04 + JDK 21 + Gradle 9 + AGP 8.13，原生 `assembleDebug`，产物为该 workflow 的 artifact。
+GitHub Actions（`.github/workflows/android.yml`）原生 `assembleDebug`，产物为该 workflow 的 artifact。
+
+工具链：
+
+- JDK 21、Gradle 9.9.3（wrapper）、AGP 9.5.3
+- `actions/checkout@v6`、`actions/setup-java@v6`、`gradle/actions/setup-gradle@v6`、`actions/upload-artifact@v7`（均 Node 24 运行时，无弃用警告）
+- 依赖源：`google()` + Google 官方 Maven Central 镜像（`maven-central.storage-download.googleapis.com`）+ `mavenCentral()`。镜像放在前面是为了绕开 CI 共享 runner IP 被 Maven Central 限流（429）的问题。
 
 ## 安装
 
