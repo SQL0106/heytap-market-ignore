@@ -26,6 +26,11 @@ public class MarketIgnoreModule extends XposedModule {
     private static final String TARGET = "com.heytap.market";
     private static final String PREFS = "market_permanent_ignore";
 
+    /** Info-level tracing is compiled in for debug builds only. */
+    private static void d(String msg) {
+        if (BuildConfig.VERBOSE_LOG) Log.i(TAG, msg);
+    }
+
     // Obfuscated static implementation, present in 26.11.3_CN.
     private static final String IMPL_CLASS = "a.a.kch";
     private static final String M_IS_IGNORED = "\u0784"; // (String)Z
@@ -41,7 +46,7 @@ public class MarketIgnoreModule extends XposedModule {
     @Override
     public void onPackageLoaded(XposedModuleInterface.PackageLoadedParam param) {
         if (!TARGET.equals(param.getPackageName())) return;
-        Log.i(TAG, "onPackageLoaded: " + param.getPackageName());
+        d("onPackageLoaded: " + param.getPackageName());
         classLoader = param.getDefaultClassLoader();
         hookFacade();
     }
@@ -67,23 +72,23 @@ public class MarketIgnoreModule extends XposedModule {
                 String pkg = chain.getArgs().isEmpty() ? null : String.valueOf(chain.getArg(0));
                 if (isIgnored) {
                     if (isPermanent(pkg)) {
-                        Log.i(TAG, "isIgnored(" + pkg + ") -> forced true");
+                        d("isIgnored(" + pkg + ") -> forced true");
                         return true;
                     }
                 } else if (isSetIgnore) {
                     Object ver = chain.getArgs().size() > 1 ? chain.getArg(1) : null;
                     if (pkg != null && ver instanceof Number) {
-                        Log.i(TAG, "setIgnore(" + pkg + ", " + ver + ") -> remembered");
+                        d("setIgnore(" + pkg + ", " + ver + ") -> remembered");
                         remember(pkg, ((Number) ver).longValue());
                     }
                 } else if (isSetNoIgnore) {
-                    Log.i(TAG, "setNoIgnore(" + pkg + ") -> forgotten");
+                    d("setNoIgnore(" + pkg + ") -> forgotten");
                     forget(pkg);
                 } else if (isList) {
                     Object result = chain.proceed();
                     if (result instanceof List) {
                         List<Object> filtered = filter((List<?>) result);
-                        Log.i(TAG, "getUpgradeInfoBeansNoIgnore: " + ((List<?>) result).size()
+                        d("getUpgradeInfoBeansNoIgnore: " + ((List<?>) result).size()
                                 + " -> " + filtered.size());
                         return filtered;
                     }
@@ -91,7 +96,7 @@ public class MarketIgnoreModule extends XposedModule {
                 }
                 return chain.proceed();
             });
-            Log.i(TAG, "hooked " + className + "#" + methodName);
+            d("hooked " + className + "#" + methodName);
         } catch (Throwable t) {
             Log.w(TAG, "skip hook " + className + "#" + methodName + ": " + t);
         }

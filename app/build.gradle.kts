@@ -11,7 +11,23 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.0"
+    }
+
+    buildFeatures {
+        buildConfig = true
+    }
+
+    buildTypes {
+        debug {
+            buildConfigField("boolean", "VERBOSE_LOG", "true")
+        }
+        release {
+            isMinifyEnabled = false
+            buildConfigField("boolean", "VERBOSE_LOG", "false")
+            // Side-load only: sign with the debug key so the artifact installs without a keystore.
+            signingConfig = signingConfigs.getByName("debug")
+        }
     }
 
     compileOptions {
