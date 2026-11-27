@@ -1,6 +1,6 @@
 # HeyTap Market Permanent Ignore
 
-让 realme / OPPO 软件商店（`com.heytap.market`）的「忽略更新」永久生效。
+让 ColorOS 软件商店（`com.heytap.market`）的「忽略更新」永久生效。
 
 商店原本只记录「包名 + 目标版本号」，当已安装版本追上该版本号后忽略状态自动失效，更新条目再次出现。本模块在用户点一次「忽略更新」时记住包名，之后：
 
