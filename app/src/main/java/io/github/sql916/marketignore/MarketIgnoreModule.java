@@ -41,6 +41,7 @@ public class MarketIgnoreModule extends XposedModule {
     @Override
     public void onPackageLoaded(XposedModuleInterface.PackageLoadedParam param) {
         if (!TARGET.equals(param.getPackageName())) return;
+        Log.i(TAG, "onPackageLoaded: " + param.getPackageName());
         classLoader = param.getDefaultClassLoader();
         hook(IMPL_CLASS, M_IS_IGNORED, String.class);
         hook(IMPL_CLASS, M_SET_IGNORE, String.class, long.class);
@@ -64,19 +65,32 @@ public class MarketIgnoreModule extends XposedModule {
             hook(m).setId("marketignore:" + className + "#" + methodName).intercept(chain -> {
                 String pkg = chain.getArgs().isEmpty() ? null : String.valueOf(chain.getArg(0));
                 if (isIgnored) {
-                    if (isPermanent(pkg)) return true;
+                    if (isPermanent(pkg)) {
+                        Log.i(TAG, "isIgnored(" + pkg + ") -> forced true");
+                        return true;
+                    }
                 } else if (isSetIgnore) {
                     Object ver = chain.getArgs().size() > 1 ? chain.getArg(1) : null;
-                    if (pkg != null && ver instanceof Number) remember(pkg, ((Number) ver).longValue());
+                    if (pkg != null && ver instanceof Number) {
+                        Log.i(TAG, "setIgnore(" + pkg + ", " + ver + ") -> remembered");
+                        remember(pkg, ((Number) ver).longValue());
+                    }
                 } else if (isSetNoIgnore) {
+                    Log.i(TAG, "setNoIgnore(" + pkg + ") -> forgotten");
                     forget(pkg);
                 } else if (isList) {
                     Object result = chain.proceed();
-                    if (result instanceof List) return filter((List<?>) result);
+                    if (result instanceof List) {
+                        List<Object> filtered = filter((List<?>) result);
+                        Log.i(TAG, "getUpgradeInfoBeansNoIgnore: " + ((List<?>) result).size()
+                                + " -> " + filtered.size());
+                        return filtered;
+                    }
                     return result;
                 }
                 return chain.proceed();
             });
+            Log.i(TAG, "hooked " + className + "#" + methodName);
         } catch (Throwable t) {
             Log.w(TAG, "skip hook " + className + "#" + methodName + ": " + t);
         }
